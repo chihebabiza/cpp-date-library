@@ -4,7 +4,7 @@
 #include <iostream>
 #include <ctime>
 #include <string>
-#include "String.h"
+#include "../String-library/String.h"
 
 using namespace std;
 
@@ -63,6 +63,7 @@ public:
     {
         return _Day;
     }
+    
     __declspec(property(get = GetDay, put = SetDay)) short Day;
 
     void SetMonth(short Month)
@@ -74,6 +75,7 @@ public:
     {
         return _Month;
     }
+    
     __declspec(property(get = GetMonth, put = SetMonth)) short Month;
 
     void SetYear(short Year)
@@ -85,6 +87,7 @@ public:
     {
         return _Year;
     }
+    
     __declspec(property(get = GetYear, put = SetYear)) short Year;
 
     void Print()
