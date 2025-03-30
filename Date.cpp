@@ -16,6 +16,6 @@ int main()
     Date1.IncreaseDateByOneMonth();
     Date1.Print();
 
-
+    system("pause");
     return 0;
 }

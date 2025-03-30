@@ -11,7 +11,6 @@ using namespace std;
 class clsDate
 {
 
-private:
     short _Day = 1;
     short _Month = 1;
     short _Year = 1900;
@@ -49,9 +48,9 @@ public:
     {
         // This will construct a date by date order in year
         clsDate Date1 = GetDateFromDayOrderInYear(DateOrderInYear, Year);
-        _Day = Date1.Day;
-        _Month = Date1.Month;
-        _Year = Date1.Year;
+        _Day = Date1.GetDay();
+        _Month = Date1.GetMonth();
+        _Year = Date1.GetYear();
     }
 
     void SetDay(short Day)
@@ -63,8 +62,6 @@ public:
     {
         return _Day;
     }
-    
-    __declspec(property(get = GetDay, put = SetDay)) short Day;
 
     void SetMonth(short Month)
     {
@@ -75,8 +72,6 @@ public:
     {
         return _Month;
     }
-    
-    __declspec(property(get = GetMonth, put = SetMonth)) short Month;
 
     void SetYear(short Year)
     {
@@ -87,8 +82,6 @@ public:
     {
         return _Year;
     }
-    
-    __declspec(property(get = GetYear, put = SetYear)) short Year;
 
     void Print()
     {
@@ -113,29 +106,29 @@ public:
     static bool IsValidDate(clsDate Date)
     {
 
-        if (Date.Day < 1 || Date.Day > 31)
+        if (Date.GetDay() < 1 || Date.GetDay() > 31)
             return false;
 
-        if (Date.Month < 1 || Date.Month > 12)
+        if (Date.GetMonth() < 1 || Date.GetMonth() > 12)
             return false;
 
-        if (Date.Month == 2)
+        if (Date.GetMonth() == 2)
         {
-            if (isLeapYear(Date.Year))
+            if (isLeapYear(Date.GetYear()))
             {
-                if (Date.Day > 29)
+                if (Date.GetDay() > 29)
                     return false;
             }
             else
             {
-                if (Date.Day > 28)
+                if (Date.GetDay() > 28)
                     return false;
             }
         }
 
-        short DaysInMonth = NumberOfDaysInAMonth(Date.Month, Date.Year);
+        short DaysInMonth = NumberOfDaysInAMonth(Date.GetMonth(), Date.GetYear());
 
-        if (Date.Day > DaysInMonth)
+        if (Date.GetDay() > DaysInMonth)
             return false;
 
         return true;
@@ -148,7 +141,7 @@ public:
 
     static string DateToString(clsDate Date)
     {
-        return to_string(Date.Day) + "/" + to_string(Date.Month) + "/" + to_string(Date.Year);
+        return to_string(Date.GetDay()) + "/" + to_string(Date.GetMonth()) + "/" + to_string(Date.GetYear());
     }
 
     string DateToString()
@@ -410,26 +403,25 @@ public:
 
     static clsDate GetDateFromDayOrderInYear(short DateOrderInYear, short Year)
     {
-
         clsDate Date;
         short RemainingDays = DateOrderInYear;
         short MonthDays = 0;
 
-        Date.Year = Year;
-        Date.Month = 1;
+        Date.SetYear(Year);
+        Date.SetMonth(1);
 
         while (true)
         {
-            MonthDays = NumberOfDaysInAMonth(Date.Month, Year);
+            MonthDays = NumberOfDaysInAMonth(Date.GetMonth(), Year);
 
             if (RemainingDays > MonthDays)
             {
                 RemainingDays -= MonthDays;
-                Date.Month++;
+                Date.SetMonth(Date.GetMonth() + 1);
             }
             else
             {
-                Date.Day = RemainingDays;
+                Date.SetDay(RemainingDays);
                 break;
             }
         }
@@ -470,7 +462,15 @@ public:
 
     static bool IsDate1BeforeDate2(clsDate Date1, clsDate Date2)
     {
-        return (Date1.Year < Date2.Year) ? true : ((Date1.Year == Date2.Year) ? (Date1.Month < Date2.Month ? true : (Date1.Month == Date2.Month ? Date1.Day < Date2.Day : false)) : false);
+        return (Date1.GetYear() < Date2.GetYear())
+                   ? true
+                   : ((Date1.GetYear() == Date2.GetYear())
+                          ? (Date1.GetMonth() < Date2.GetMonth()
+                                 ? true
+                                 : (Date1.GetMonth() == Date2.GetMonth()
+                                        ? Date1.GetDay() < Date2.GetDay()
+                                        : false))
+                          : false);
     }
 
     bool IsDateBeforeDate2(clsDate Date2)
@@ -481,7 +481,7 @@ public:
 
     static bool IsDate1EqualDate2(clsDate Date1, clsDate Date2)
     {
-        return (Date1.Year == Date2.Year) ? ((Date1.Month == Date2.Month) ? ((Date1.Day == Date2.Day) ? true : false) : false) : false;
+        return (Date1.GetYear() == Date2.GetYear()) ? ((Date1.GetMonth() == Date2.GetMonth()) ? ((Date1.GetDay() == Date2.GetDay()) ? true : false) : false) : false;
     }
 
     bool IsDateEqualDate2(clsDate Date2)
@@ -492,7 +492,7 @@ public:
     static bool IsLastDayInMonth(clsDate Date)
     {
 
-        return (Date.Day == NumberOfDaysInAMonth(Date.Month, Date.Year));
+        return (Date.GetDay() == NumberOfDaysInAMonth(Date.GetMonth(), Date.GetYear()));
     }
 
     bool IsLastDayInMonth()
@@ -510,21 +510,21 @@ public:
     {
         if (IsLastDayInMonth(Date))
         {
-            if (IsLastMonthInYear(Date.Month))
+            if (IsLastMonthInYear(Date.GetMonth()))
             {
-                Date.Month = 1;
-                Date.Day = 1;
-                Date.Year++;
+                Date.SetMonth(1);
+                Date.SetDay(1);
+                Date.SetYear(Date.GetYear() + 1);
             }
             else
             {
-                Date.Day = 1;
-                Date.Month++;
+                Date.SetDay(1);
+                Date.SetMonth(Date.GetMonth() + 1);
             }
         }
         else
         {
-            Date.Day++;
+            Date.SetDay(Date.GetDay() + 1);
         }
 
         return Date;
@@ -609,26 +609,23 @@ public:
         IncreaseDateByXWeeks(Weeks, *this);
     }
 
-    clsDate IncreaseDateByOneMonth(clsDate &Date)
+    static clsDate IncreaseDateByOneMonth(clsDate &Date)
     {
-
-        if (Date.Month == 12)
+        if (Date.GetMonth() == 12)
         {
-            Date.Month = 1;
-            Date.Year++;
+            Date.SetMonth(1);
+            Date.SetYear(Date.GetYear() + 1);
         }
         else
         {
-            Date.Month++;
+            Date.SetMonth(Date.GetMonth() + 1);
         }
 
-        // last check day in date should not exceed max days in the current month
-        //  example if date is 31/1/2022 increasing one month should not be 31/2/2022, it should
-        //  be 28/2/2022
-        short NumberOfDaysInCurrentMonth = NumberOfDaysInAMonth(Date.Month, Date.Year);
-        if (Date.Day > NumberOfDaysInCurrentMonth)
+        // Ensure the day does not exceed the max days in the new month
+        short NumberOfDaysInCurrentMonth = NumberOfDaysInAMonth(Date.GetMonth(), Date.GetYear());
+        if (Date.GetDay() > NumberOfDaysInCurrentMonth)
         {
-            Date.Day = NumberOfDaysInCurrentMonth;
+            Date.SetDay(NumberOfDaysInCurrentMonth);
         }
 
         return Date;
@@ -673,7 +670,7 @@ public:
 
     static clsDate IncreaseDateByOneYear(clsDate &Date)
     {
-        Date.Year++;
+        Date.SetYear(Date.GetYear() + 1);
         return Date;
     }
 
@@ -682,9 +679,9 @@ public:
         IncreaseDateByOneYear(*this);
     }
 
-    clsDate IncreaseDateByXYears(short Years, clsDate &Date)
+    static clsDate IncreaseDateByXYears(short Years, clsDate &Date)
     {
-        Date.Year += Years;
+        Date.SetYear(Date.GetYear() + Years);
         return Date;
     }
 
@@ -693,10 +690,10 @@ public:
         IncreaseDateByXYears(Years);
     }
 
-    clsDate IncreaseDateByOneDecade(clsDate &Date)
+    static clsDate IncreaseDateByOneDecade(clsDate &Date)
     {
-        // Period of 10 years
-        Date.Year += 10;
+        // Increase the year by 10
+        Date.SetYear(Date.GetYear() + 10);
         return Date;
     }
 
@@ -705,9 +702,9 @@ public:
         IncreaseDateByOneDecade(*this);
     }
 
-    clsDate IncreaseDateByXDecades(short Decade, clsDate &Date)
+    static clsDate IncreaseDateByXDecades(short Decade, clsDate &Date)
     {
-        Date.Year += Decade * 10;
+        Date.SetYear(Date.GetYear() + (Decade * 10));
         return Date;
     }
 
@@ -716,10 +713,10 @@ public:
         IncreaseDateByXDecades(Decade, *this);
     }
 
-    clsDate IncreaseDateByOneCentury(clsDate &Date)
+    static clsDate IncreaseDateByOneCentury(clsDate &Date)
     {
-        // Period of 100 years
-        Date.Year += 100;
+        // Increase the year by 100
+        Date.SetYear(Date.GetYear() + 100);
         return Date;
     }
 
@@ -728,10 +725,10 @@ public:
         IncreaseDateByOneCentury(*this);
     }
 
-    clsDate IncreaseDateByOneMillennium(clsDate &Date)
+    static clsDate IncreaseDateByOneMillennium(clsDate &Date)
     {
-        // Period of 1000 years
-        Date.Year += 1000;
+        // Increase the year by 1000
+        Date.SetYear(Date.GetYear() + 1000);
         return Date;
     }
 
@@ -742,24 +739,23 @@ public:
 
     static clsDate DecreaseDateByOneDay(clsDate Date)
     {
-        if (Date.Day == 1)
+        if (Date.GetDay() == 1)
         {
-            if (Date.Month == 1)
+            if (Date.GetMonth() == 1)
             {
-                Date.Month = 12;
-                Date.Day = 31;
-                Date.Year--;
+                Date.SetMonth(12);
+                Date.SetDay(31);
+                Date.SetYear(Date.GetYear() - 1);
             }
             else
             {
-
-                Date.Month--;
-                Date.Day = NumberOfDaysInAMonth(Date.Month, Date.Year);
+                Date.SetMonth(Date.GetMonth() - 1);
+                Date.SetDay(NumberOfDaysInAMonth(Date.GetMonth(), Date.GetYear()));
             }
         }
         else
         {
-            Date.Day--;
+            Date.SetDay(Date.GetDay() - 1);
         }
 
         return Date;
@@ -800,25 +796,23 @@ public:
     {
         DecreaseDateByXWeeks(Weeks, *this);
     }
-
     static clsDate DecreaseDateByOneMonth(clsDate &Date)
     {
-
-        if (Date.Month == 1)
+        if (Date.GetMonth() == 1)
         {
-            Date.Month = 12;
-            Date.Year--;
+            Date.SetMonth(12);
+            Date.SetYear(Date.GetYear() - 1);
         }
         else
-            Date.Month--;
-
-        // last check day in date should not exceed max days in the current month
-        // example if date is 31/3/2022 decreasing one month should not be 31/2/2022, it should
-        // be 28/2/2022
-        short NumberOfDaysInCurrentMonth = NumberOfDaysInAMonth(Date.Month, Date.Year);
-        if (Date.Day > NumberOfDaysInCurrentMonth)
         {
-            Date.Day = NumberOfDaysInCurrentMonth;
+            Date.SetMonth(Date.GetMonth() - 1);
+        }
+
+        // Ensure the day does not exceed the max days in the new month
+        short NumberOfDaysInCurrentMonth = NumberOfDaysInAMonth(Date.GetMonth(), Date.GetYear());
+        if (Date.GetDay() > NumberOfDaysInCurrentMonth)
+        {
+            Date.SetDay(NumberOfDaysInCurrentMonth);
         }
 
         return Date;
@@ -861,8 +855,7 @@ public:
 
     static clsDate DecreaseDateByOneYear(clsDate &Date)
     {
-
-        Date.Year--;
+        Date.SetYear(Date.GetYear() - 1);
         return Date;
     }
 
@@ -873,8 +866,7 @@ public:
 
     static clsDate DecreaseDateByXYears(short Years, clsDate &Date)
     {
-
-        Date.Year -= Years;
+        Date.SetYear(Date.GetYear() - Years);
         return Date;
     }
 
@@ -885,8 +877,7 @@ public:
 
     static clsDate DecreaseDateByOneDecade(clsDate &Date)
     {
-        // Period of 10 years
-        Date.Year -= 10;
+        Date.SetYear(Date.GetYear() - 10);
         return Date;
     }
 
@@ -897,8 +888,7 @@ public:
 
     static clsDate DecreaseDateByXDecades(short Decades, clsDate &Date)
     {
-
-        Date.Year -= Decades * 10;
+        Date.SetYear(Date.GetYear() - (Decades * 10));
         return Date;
     }
 
@@ -909,8 +899,7 @@ public:
 
     static clsDate DecreaseDateByOneCentury(clsDate &Date)
     {
-        // Period of 100 years
-        Date.Year -= 100;
+        Date.SetYear(Date.GetYear() - 100);
         return Date;
     }
 
@@ -922,7 +911,7 @@ public:
     static clsDate DecreaseDateByOneMillennium(clsDate &Date)
     {
         // Period of 1000 years
-        Date.Year -= 1000;
+        Date.SetYear(Date.GetYear() - 1000);
         return Date;
     }
 
@@ -933,7 +922,7 @@ public:
 
     static short IsEndOfWeek(clsDate Date)
     {
-        return DayOfWeekOrder(Date.Day, Date.Month, Date.Year) == 6;
+        return DayOfWeekOrder(Date.GetDay(), Date.GetMonth(), Date.GetYear()) == 6;
     }
 
     short IsEndOfWeek()
@@ -944,7 +933,7 @@ public:
     static bool IsWeekEnd(clsDate Date)
     {
         // Weekends are Fri and Sat
-        short DayIndex = DayOfWeekOrder(Date.Day, Date.Month, Date.Year);
+        short DayIndex = DayOfWeekOrder(Date.GetDay(), Date.GetMonth(), Date.GetYear());
         return (DayIndex == 5 || DayIndex == 6);
     }
 
@@ -973,7 +962,7 @@ public:
 
     static short DaysUntilTheEndOfWeek(clsDate Date)
     {
-        return 6 - DayOfWeekOrder(Date.Day, Date.Month, Date.Year);
+        return 6 - DayOfWeekOrder(Date.GetDay(), Date.GetMonth(), Date.GetYear());
     }
 
     short DaysUntilTheEndOfWeek()
@@ -983,13 +972,12 @@ public:
 
     static short DaysUntilTheEndOfMonth(clsDate Date1)
     {
+        clsDate EndOfMonthDate;
+        EndOfMonthDate.SetDay(NumberOfDaysInAMonth(Date1.GetMonth(), Date1.GetYear()));
+        EndOfMonthDate.SetMonth(Date1.GetMonth());
+        EndOfMonthDate.SetYear(Date1.GetYear());
 
-        clsDate EndOfMontDate;
-        EndOfMontDate.Day = NumberOfDaysInAMonth(Date1.Month, Date1.Year);
-        EndOfMontDate.Month = Date1.Month;
-        EndOfMontDate.Year = Date1.Year;
-
-        return GetDifferenceInDays(Date1, EndOfMontDate, true);
+        return GetDifferenceInDays(Date1, EndOfMonthDate, true);
     }
 
     short DaysUntilTheEndOfMonth()
@@ -1001,9 +989,9 @@ public:
     {
 
         clsDate EndOfYearDate;
-        EndOfYearDate.Day = 31;
-        EndOfYearDate.Month = 12;
-        EndOfYearDate.Year = Date1.Year;
+        EndOfYearDate.SetDay(31);
+        EndOfYearDate.SetMonth(12);
+        EndOfYearDate.SetYear(Date1.GetYear());
 
         return GetDifferenceInDays(Date1, EndOfYearDate, true);
     }
