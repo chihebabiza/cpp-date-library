@@ -1,3 +1,6 @@
+// MIT License
+// Copyright (c) 2025 Abiza Chiheb
+// See the LICENSE file for full details.
 #pragma warning(disable : 4996)
 #pragma once
 
