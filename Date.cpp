@@ -2,7 +2,7 @@
 // Copyright (c) 2025 Abiza Chiheb
 // See the LICENSE file for full details.
 #include <iostream>
-#include "Date.h"
+#include "clsDate.h"
 
 using namespace std;
 
@@ -19,6 +19,7 @@ int main()
     Date1.IncreaseDateByOneMonth();
     Date1.Print();
 
-    system("pause");
+    system("read -p '\nPress Enter to continue...'");
+    
     return 0;
 }
